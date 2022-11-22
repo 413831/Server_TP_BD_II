@@ -32,6 +32,10 @@ cliente.connect(uri, (err, client) =>
     let centers = client.db('TP_BD_II').collection("centers");
     let equipos = client.db('TP_BD_II').collection("equipos");
 
+    app.get("/", (req, res) => { 
+        res.json({message: "Todo funciona de maravilla"})
+    });
+
     // TICKETS
     app.get("/tickets", (req, res) => { 
         tickets.find().toArray(function (err, result) {
