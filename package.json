@@ -2,12 +2,12 @@
   "name": "crud-demo",
   "version": "1.0.0",
   "description": "Demo for Crud Express MongoDB article at https://zellwk.com/blog/crud-express-mongodb",
-  "main": "server.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node server",
-    "restart": "node server.js crud-demo --update-env",
-    "dev": "nodemon server",
-    "sync": "node sync.js"
+    "start": "node app.js",
+    "restart": "node app.js crud-demo --update-env",
+    "dev": "nodemon app",
+    "sync": "node app.js"
   },
   "author": "Zell Liew <zellwk@gmail.com> (https://zellwk.com)",
   "license": "MIT",
@@ -22,5 +22,8 @@
   "devDependencies": {
     "nodemon": "^2.0.7",
     "rsync": "^0.6.1"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }
