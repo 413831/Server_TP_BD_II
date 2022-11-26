@@ -33,6 +33,10 @@ cliente.connect(uri, (err, client) =>
     let equipos = client.db('TP_BD_II').collection("equipos");
 
     // TICKETS
+    app.get("/", (req, res) => { 
+        res.json({message: "Todo funciona de maravilla"})
+    });
+
     app.get("/tickets", (req, res) => { 
         tickets.find().toArray(function (err, result) {
             if (err) {
