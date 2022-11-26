@@ -3,6 +3,7 @@ const app = express();
 mongodb = require("mongodb");
 cliente = mongodb.MongoClient; //En cliente ya tenemos nuestro acceso a la BD.
 
+const PORT = process.env.PORT || 3000;
 const uri = "mongodb+srv://bddosutn:admin123@cluster0.bbrw0lt.mongodb.net/?retryWrites=true&w=majority"
 
 app.use(function(req, res, next) {
@@ -384,8 +385,8 @@ cliente.connect(uri, (err, client) =>
         ,err => { if(err) console.log(err) }
     });
 
-    app.listen(3000, () => {
-        console.log("Servidor escuchando en puerto 3000");
+    app.listen(PORT, () => {
+        console.log("Servidor funcionando");
     });
 })
 
