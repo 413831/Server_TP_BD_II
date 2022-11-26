@@ -3,7 +3,6 @@ const app = express();
 mongodb = require("mongodb");
 cliente = mongodb.MongoClient; //En cliente ya tenemos nuestro acceso a la BD.
 
-const PORT = process.env.PORT || 3000;
 const uri = "mongodb+srv://bddosutn:admin123@cluster0.bbrw0lt.mongodb.net/?retryWrites=true&w=majority"
 
 app.use(function(req, res, next) {
@@ -31,10 +30,6 @@ cliente.connect(uri, (err, client) =>
     let customers = client.db('TP_BD_II').collection("customers");
     let centers = client.db('TP_BD_II').collection("centers");
     let equipos = client.db('TP_BD_II').collection("equipos");
-
-    app.get("/", (req, res) => { 
-        res.json({message: "Todo funciona de maravilla"})
-    });
 
     // TICKETS
     app.get("/tickets", (req, res) => { 
@@ -208,6 +203,77 @@ cliente.connect(uri, (err, client) =>
         ,err => { if(err) console.log(err) }
     })
 
+    app.get("/tickets/tickets_equipo", (req, res) => {
+        tickets.find({$text:{$search:"equipo"}}).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(result);
+            }
+        })
+        ,err => { if(err) console.log(err) }
+    })
+
+    app.get("/tickets/type_description", (req, res) => {
+        tickets.find({"description":{$type:"string"}}).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(result);
+            }
+        })
+        ,err => { if(err) console.log(err) }
+    })
+
+    app.get("/tickets/all_change_soporte", (req, res) => {
+        tickets.find({tags:{$all:["change","soporte"]}}).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(result);
+            }
+        })
+        ,err => { if(err) console.log(err) }
+    })
+
+    app.get("/tickets/ticket_by_tags", (req, res) => {
+        tickets.find([ { $unwind: "$tags" },  { $sortByCount: "$tags" } ]).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(result);
+            }
+        })
+        ,err => { if(err) console.log(err) }
+    })
+
+    app.get("/tickets/promedio_vistas_area", async (req, res) => {
+        resp = []
+        result = tickets.aggregate([{$group:{_id:"$current_area",promedio_vistas: {$avg:"$view_counter"}}}])         
+
+        await result.forEach(ticket => {
+            console.log(`${ticket._id}, ${ticket.promedio_vistas}`);
+            resp.push({
+                "current_area": ticket._id, 
+                "promedio": ticket.promedio_vistas, 
+            })
+        });       
+        console.log(resp)
+        res.json(resp)
+        ,err => { if(err) console.log(err) }
+    })
+
+    app.get("/tickets/less_10_views", (req, res) => {
+        tickets.find({$expr: {$lt:["$view_counter",10]}}).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(result);
+            }
+        })
+        ,err => { if(err) console.log(err) }
+    })
+
     app.get("/customers/pack_normal", (req, res) => {
         result = customers.count({selected_plan:"normal"})
         res.json(result)
@@ -260,6 +326,40 @@ cliente.connect(uri, (err, client) =>
         ,err => { if(err) console.log(err) }
     });
 
+    app.get("/customers/on_demand", (req, res) => {
+        result = customers.find({servicio_on_demand:{$exists:true}}).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(result);
+            }
+        })
+        ,err => { if(err) console.log(err) }
+    });
+
+    app.get("/customers/extra_sports", (req, res) => {
+        result = customers.find({packs_extra:{$elemMatch:{$eq:"sports"}}}).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(result);
+            }
+        })
+        ,err => { if(err) console.log(err) }
+    });
+
+    app.get("/customers/three_ondemand", (req, res) => {
+        result = customers.find({servicio_on_demand:{$size:3}}).toArray(function (err, result) {
+            if (err) {
+                res.send(err);
+            } else {
+                res.json(result);
+            }
+        })
+        ,err => { if(err) console.log(err) }
+    });
+
+
     app.get("/centers/more_than_40", (req, res) => {
         result = centers.find({staff_counter:{$gt:40}}).toArray(function (err, result) {
             if (err) {
@@ -284,7 +384,7 @@ cliente.connect(uri, (err, client) =>
         ,err => { if(err) console.log(err) }
     });
 
-    app.listen(PORT, () => {
+    app.listen(3000, () => {
         console.log("Servidor escuchando en puerto 3000");
     });
 })
